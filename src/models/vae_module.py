@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 from torchvision.utils import make_grid
 
+from src.evaluator.evaluator import Evaluator
 from src.models.components.vae import VAE
 
 
@@ -13,12 +14,14 @@ class VAELitModule(pl.LightningModule):
     def __init__(
             self,
             net: VAE,
+            evaluator: Evaluator,
             optimizer: torch.optim.optimizer,
             scheduler: Optional[torch.optim.lr_scheduler] = None,
     ):
         super().__init__()
         self.save_hyperparameters(logger=False)
         self.net = net
+        self.evaluator = evaluator
 
     @staticmethod
     def mse_loss(x, recon_x):
@@ -46,10 +49,11 @@ class VAELitModule(pl.LightningModule):
     def validation_step(self, batch, batch_idx: int):
         x = batch['image']
         recon_x, _, _ = self(x)
-        return {
-            'x': x,
-            'recon_x': recon_x,
-        }
+        self.evaluator.add_images(real_images=x, fake_images=recon_x)
+
+    def validation_epoch_end(self, outputs):
+        fid = self.evaluator.calculate()
+        self.log('val/fid', fid, on_epoch=True)
 
     def configure_optimizers(self):
         optimizer = self.hparams.optimizer(self.net.parameters())
