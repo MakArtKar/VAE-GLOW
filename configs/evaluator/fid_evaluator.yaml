@@ -1,0 +1,3 @@
+FIDEvaluator:
+  _target_: src.evaluator.fid_evaluator.FIDEvaluator
+  dims: 2048

@@ -1,0 +1,7 @@
+_target_: src.data.celeb_a_datamodule.CelebADataModule
+data_dir: 'data/celeba'
+batch_size: 8
+num_workers: 8
+pin_memory: True
+train_transform: null
+val_transform: null

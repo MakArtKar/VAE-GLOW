@@ -12,7 +12,7 @@ from src.data.components.celeb_a_dataset import CelebA
 class CelebADataModule(pl.LightningDataModule):
     def __init__(
             self,
-            data_dir: str = 'data/celeba',
+            data_dir: str,
             batch_size: int = 8,
             num_workers: int = 8,
             pin_memory: bool = True,
@@ -31,7 +31,7 @@ class CelebADataModule(pl.LightningDataModule):
     def prepare_data(self):
         gdown.download(id='0B7EVK8r0v71pZjFTYXZWM3FlRnM', output='img_align_celeba.zip', fuzzy=True)
         with zipfile.ZipFile('img_align_celeba.zip', 'r') as zip_ref:
-            zip_ref.extractall('data/celeba')
+            zip_ref.extractall(self.hparams.data_dir)
 
     def setup(self, stage: Optional[str] = None):
         if not self.data_train and not self.data_val and not self.data_test:

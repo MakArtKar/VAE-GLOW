@@ -11,14 +11,13 @@ from src.utils.fid.inception import InceptionV3
 
 
 class FidEvaluator(BaseEvaluator):
-    def __init__(self, dims, device):
+    def __init__(self, dims):
         super().__init__()
 
         self.dims = dims
-        self.device = device
 
         block_idx = InceptionV3.BLOCK_INDEX_BY_DIM[dims]
-        self.model = InceptionV3([block_idx]).to(device)
+        self.model = InceptionV3([block_idx])
         self.model.eval()
 
         self.fake_acts = None
@@ -30,7 +29,7 @@ class FidEvaluator(BaseEvaluator):
         self.fake_acts = []
 
     def calc_acts(self, images: Tensor) -> np.ndarray:
-        images = images.to(self.device)
+        self.model.to(images.device)
         pred = self.model(images)[0]
         if pred.size(2) != 1 or pred.size(3) != 1:
             pred = adaptive_avg_pool2d(pred, output_size=(1, 1))
