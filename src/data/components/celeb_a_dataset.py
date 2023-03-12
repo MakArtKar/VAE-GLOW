@@ -1,24 +1,22 @@
-# Seminar 6
 import os
-from typing import Optional
 
-import albumentations
+import numpy as np
 from PIL import Image
-from torch.utils.data import Dataset
+
+from src.data.components.celeba import CelebADataset
 
 
-class CelebA(Dataset):
-    def __init__(self, root_path: str, transform: Optional[albumentations.ImageOnlyTransform] = None):
-        super().__init__()
-        self.transform = transform
-        self.root_path = root_path
-        self.img_paths = os.listdir(root_path)
-
-    def __len__(self):
-        return len(self.img_paths)
-
-    def __getitem__(self, idx: int):
-        img = Image.open(os.path.join(self.root_path, self.img_paths[idx]))
+class WrappedCelebADataset(CelebADataset):
+    def __getitem__(self, idx):
+        img_name = self.filenames[idx]
+        img_path = os.path.join(self.dataset_folder, img_name)
+        # Load image and convert it to RGB
+        img = Image.open(img_path).convert('RGB')
+        img = np.array(img, dtype=np.uint8)
+        # Apply transformations to the image
         if self.transform:
             img = self.transform(image=img)['image']
-        return img
+        img = img / 255
+        return {
+            'image': img,
+        }

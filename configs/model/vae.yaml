@@ -6,12 +6,12 @@ net:
   ndf: 32
   nef: 32
   nz: 100
-  isize: ${....image_size}
+  isize: ${...image_size}
 
 evaluator:
   _target_: src.evaluator.evaluator.Evaluator
   evaluators:
-    - ${.....FIDEvaluator}
+    - ${....FIDEvaluator}
 
 optimizer:
   _target_: torch.optim.AdamW

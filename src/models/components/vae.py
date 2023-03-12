@@ -35,6 +35,6 @@ class VAE(nn.Module):
         eps = torch.randn_like(std)
         return mu + eps * std
 
-    def sample(self, size):
-        sample = torch.randn(size, self.nz).to(self.device)
+    def sample(self, size, device):
+        sample = torch.randn(size, self.nz).to(device)
         return self.decode(sample)

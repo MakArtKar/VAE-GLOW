@@ -5,6 +5,9 @@ from torch import Tensor
 
 
 class BaseEvaluator:
+    def reset(self, *args, **kwargs) -> None:
+        ...
+
     @abstractmethod
     def add_images(self, *args, **kwargs) -> None:
         raise NotImplementedError()

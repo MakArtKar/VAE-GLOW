@@ -10,6 +10,10 @@ class Evaluator(BaseEvaluator):
         super().__init__()
         self.evaluators = evaluators
 
+    def reset(self, *args, **kwargs) -> None:
+        for evaluator in self.evaluators:
+            evaluator.reset(*args, **kwargs)
+
     def add_images(self, *args, **kwargs) -> None:
         for evaluator in self.evaluators:
             evaluator.add_images(*args, **kwargs)

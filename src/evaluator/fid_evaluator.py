@@ -10,7 +10,7 @@ from src.evaluator.base_evaluator import BaseEvaluator
 from src.utils.fid.inception import InceptionV3
 
 
-class FidEvaluator(BaseEvaluator):
+class FIDEvaluator(BaseEvaluator):
     def __init__(self, dims):
         super().__init__()
 
@@ -24,7 +24,7 @@ class FidEvaluator(BaseEvaluator):
         self.real_acts = None
         self.reset()
 
-    def reset(self):
+    def reset(self, *args, **kwargs):
         self.real_acts = []
         self.fake_acts = []
 
@@ -36,7 +36,7 @@ class FidEvaluator(BaseEvaluator):
 
         return pred.squeeze(3).squeeze(2).cpu().numpy()
 
-    def add_images(self, real_images: Tensor, fake_images: Tensor) -> None:
+    def add_images(self, real_images: Tensor, fake_images: Tensor, *args, **kwargs) -> None:
         self.real_acts.append(self.calc_acts(real_images))
         self.fake_acts.append(self.calc_acts(fake_images))
 
@@ -46,9 +46,9 @@ class FidEvaluator(BaseEvaluator):
         sigma = np.cov(acts, rowvar=False)
         return mu, sigma
 
-    def calculate(self) -> Dict[str, float]:
+    def calculate(self, *args, **kwargs) -> Dict[str, float]:
         self.real_acts = np.concatenate(self.real_acts, axis=0)
-        self.fake_acts = np.concatenate(self.real_acts, axis=0)
+        self.fake_acts = np.concatenate(self.fake_acts, axis=0)
 
         m1, s1 = self.calculate_activation_statistics(self.real_acts)
         m2, s2 = self.calculate_activation_statistics(self.fake_acts)
@@ -83,9 +83,9 @@ class FidEvaluator(BaseEvaluator):
         sigma2 = np.atleast_2d(sigma2)
 
         assert mu1.shape == mu2.shape, \
-            'Training and test mean vectors have different lengths'
+            f'Training and test mean vectors have different lengths, {mu1.shape} != {mu2.shape}'
         assert sigma1.shape == sigma2.shape, \
-            'Training and test covariances have different dimensions'
+            f'Training and test covariances have different dimensions, {sigma1.shape} != {sigma2.shape}'
 
         diff = mu1 - mu2
 

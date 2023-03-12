@@ -3,7 +3,6 @@ from typing import Optional
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-from torchvision.utils import make_grid
 
 from src.evaluator.evaluator import Evaluator
 from src.models.components.vae import VAE
@@ -15,8 +14,8 @@ class VAELitModule(pl.LightningModule):
             self,
             net: VAE,
             evaluator: Evaluator,
-            optimizer: torch.optim.optimizer,
-            scheduler: Optional[torch.optim.lr_scheduler] = None,
+            optimizer: torch.optim.Optimizer,
+            scheduler = None,
     ):
         super().__init__()
         self.save_hyperparameters(logger=False)
@@ -41,19 +40,47 @@ class VAELitModule(pl.LightningModule):
         mse_loss = self.mse_loss(x, recon_x)
         kld_loss = self.kld_loss(mu, logvar)
         loss = mse_loss + kld_loss
-        self.log('train/mse_loss', mse_loss, on_step=True, on_epoch=True, prog_bar=True)
-        self.log('train/kld_loss', kld_loss, on_step=True, on_epoch=True, prog_bar=True)
-        self.log('train/loss', loss, on_step=True, on_epoch=True, prog_bar=True)
+        self.log('train/mse_loss', mse_loss, on_step=True, prog_bar=True, sync_dist=True, batch_size=x.size(0))
+        self.log('train/kld_loss', kld_loss, on_step=True, prog_bar=True, sync_dist=True, batch_size=x.size(0))
+        self.log('train/loss', loss, on_step=True, prog_bar=True, sync_dist=True, batch_size=x.size(0))
         return loss
 
-    def validation_step(self, batch, batch_idx: int):
+    def on_validation_epoch_start(self) -> None:
+        self.evaluator.reset()
+
+    def validation_step(self, batch, batch_idx: int, mode='val'):
         x = batch['image']
-        recon_x, _, _ = self(x)
+        recon_x, mu, logvar = self(x)
+        mse_loss = self.mse_loss(x, recon_x)
+        kld_loss = self.kld_loss(mu, logvar)
+        loss = mse_loss + kld_loss
         self.evaluator.add_images(real_images=x, fake_images=recon_x)
 
-    def validation_epoch_end(self, outputs):
-        fid = self.evaluator.calculate()
-        self.log('val/fid', fid, on_epoch=True)
+        self.log(f'{mode}/mse_loss', mse_loss, prog_bar=True, sync_dist=True, batch_size=x.size(0))
+        self.log(f'{mode}/kld_loss', kld_loss, prog_bar=True, sync_dist=True, batch_size=x.size(0))
+        self.log(f'{mode}/loss', loss, prog_bar=True, sync_dist=True, batch_size=x.size(0))
+
+        result = {'loss': loss}
+        if batch_idx == 0:
+            result.update({
+                'x': x,
+                'recon_x': recon_x,
+            })
+        return result
+
+    def validation_epoch_end(self, outputs, mode='val'):
+        result = self.evaluator.calculate()
+        for name, metric in result.items():
+            self.log(f'{mode}/{name}', metric, prog_bar=True)
+
+    def on_test_epoch_start(self) -> None:
+        self.on_validation_epoch_start()
+
+    def test_step(self, batch, batch_idx: int):
+        self.validation_step(batch, batch_idx, mode='test')
+
+    def test_epoch_end(self, outputs):
+        self.validation_epoch_end(outputs, mode='test')
 
     def configure_optimizers(self):
         optimizer = self.hparams.optimizer(self.net.parameters())
@@ -64,6 +91,7 @@ class VAELitModule(pl.LightningModule):
                 'lr_scheduler': {
                     'scheduler': scheduler,
                     'monitor': 'val/fid',
+                    'mode': 'min',
                     'interval': 'epoch',
                     'frequency': 1,
                 },
