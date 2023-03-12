@@ -32,7 +32,7 @@ class VAELitModule(pl.LightningModule):
     def forward(self, x: torch.Tensor):
         return self.net(x)
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch, batch_idx: int):
         x = batch['image']
         recon_x, mu, logvar = self(x)
         mse_loss = self.mse_loss(x, recon_x)
@@ -42,6 +42,14 @@ class VAELitModule(pl.LightningModule):
         self.log('train/kld_loss', kld_loss, on_step=True, on_epoch=True, prog_bar=True)
         self.log('train/loss', loss, on_step=True, on_epoch=True, prog_bar=True)
         return loss
+
+    def validation_step(self, batch, batch_idx: int):
+        x = batch['image']
+        recon_x, _, _ = self(x)
+        return {
+            'x': x,
+            'recon_x': recon_x,
+        }
 
     def configure_optimizers(self):
         optimizer = self.hparams.optimizer(self.net.parameters())
