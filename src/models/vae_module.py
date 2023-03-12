@@ -15,7 +15,8 @@ class VAELitModule(pl.LightningModule):
             net: VAE,
             evaluator: Evaluator,
             optimizer: torch.optim.Optimizer,
-            scheduler = None,
+            scheduler=None,
+            fid_frequency: int = 5,
     ):
         super().__init__()
         self.save_hyperparameters(logger=False)
@@ -54,7 +55,8 @@ class VAELitModule(pl.LightningModule):
         mse_loss = self.mse_loss(x, recon_x)
         kld_loss = self.kld_loss(mu, logvar)
         loss = mse_loss + kld_loss
-        self.evaluator.add_images(real_images=x, fake_images=recon_x)
+        if batch_idx % self.hparams.fid_frequency == 0:
+            self.evaluator.add_images(real_images=x, fake_images=recon_x)
 
         self.log(f'{mode}/mse_loss', mse_loss, prog_bar=True, sync_dist=True, batch_size=x.size(0))
         self.log(f'{mode}/kld_loss', kld_loss, prog_bar=True, sync_dist=True, batch_size=x.size(0))

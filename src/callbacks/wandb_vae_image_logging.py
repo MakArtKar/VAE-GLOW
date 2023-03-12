@@ -22,7 +22,7 @@ class WandbVAEImageLogging(pl.Callback):
         dataloader_idx: int,
     ) -> None:
         if batch_idx == 0:
-            x, recon_x = outputs['x'], outputs['recon_x']
+            x, recon_x = outputs['x'][:8], outputs['recon_x'][:8]
             samples = torch.cat([x, recon_x], dim=0)
             images = make_grid(samples, nrow=x.size(0))
             images = torch.clip((images + 1) / 2, 0, 1)
