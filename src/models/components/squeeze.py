@@ -1,12 +1,11 @@
 from typing import Tuple
 
-import torch
 from torch import Tensor
 
 from src.models.components.base_flow_model import BaseFlowModel
 
 
-class SqueezeBlock(BaseFlowModel):
+class Squeeze(BaseFlowModel):
     def forward(self, x, reverse=False, **kwargs) -> Tuple[Tensor, Tensor]:
         b, c, h, w = x.size()
         if not reverse:
