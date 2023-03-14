@@ -1,17 +1,22 @@
+from typing import Union, Tuple
+
 import torch
 import torch.nn as nn
+from torch import Tensor
+
+from src.models.components.base_flow_model import BaseFlowModel
 
 
-class ActNorm(nn.Module):
+class ActNorm(BaseFlowModel):
     EPSILON = 1e-6
 
-    def __init__(self, shape: tuple):
+    def __init__(self, channels: int):
         super().__init__()
-        self.mu = nn.Parameter(torch.zeros(shape))
-        self.sigma = nn.Parameter(torch.ones(shape))
+        self.mu = nn.Parameter(torch.zeros(1, channels, 1, 1))
+        self.sigma = nn.Parameter(torch.ones(1, channels, 1, 1))
         self.is_initialized = False
 
-    def forward(self, x, reverse=False):
+    def forward(self, x, reverse=False, return_log_det=False) -> Union[Tensor, Tuple[Tensor, Tensor]]:
         if not self.is_initialized:
             self.mu.data = x.transpose(0, 1).view(x.size(1), -1).mean(1).view_as(self.mu)
             self.sigma.data = (x.transpose(0, 1).view(x.size(1), -1).std(1) + self.EPSILON).view_as(self.sigma)
@@ -24,4 +29,7 @@ class ActNorm(nn.Module):
             out = x * self.sigma + self.mu
             log_det = self.sigma.abs().log().sum() * x.size(2) * x.size(3)
 
-        return out, log_det
+        if return_log_det:
+            return out, log_det
+        else:
+            return out
