@@ -24,6 +24,6 @@ class FlowSequential(BaseFlowModel):
         log_det: Tensor = torch.tensor([0]).to(x.device)
         blocks = self.flow_models if not reverse else self.flow_models[::-1]
         for model in blocks:
-            x, model_log_det = model(x, log_det, reverse=reverse)
+            x, model_log_det = model(x, reverse=reverse, **kwargs)
             log_det += model_log_det
         return x, log_det

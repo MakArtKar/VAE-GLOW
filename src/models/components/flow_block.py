@@ -4,9 +4,9 @@ from src.models.components.squeeze import Squeeze
 
 
 class FlowBlock(FlowSequential):
-    def __init__(self, in_channels: int, hid_channels: int):
+    def __init__(self, depth: int, in_channels: int, hid_channels: int):
         super().__init__(
             Squeeze(),
-            FlowStep(in_channels, hid_channels),
+            *[FlowStep(in_channels, hid_channels) for _ in range(depth)],
             Split(),
         )
