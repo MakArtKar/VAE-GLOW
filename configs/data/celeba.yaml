@@ -1,0 +1,16 @@
+_target_: src.data.celeb_a_datamodule.CelebADataModule
+data_dir: 'data/celeba'
+batch_size: 16
+num_workers: 16
+pin_memory: True
+train_transform:
+  _target_: albumentations.Compose
+  transforms:
+    - ${....transforms.Resize}
+    - ${....transforms.ToTensorV2}
+
+val_transform:
+  _target_: albumentations.Compose
+  transforms:
+    - ${....transforms.Resize}
+    - ${....transforms.ToTensorV2}

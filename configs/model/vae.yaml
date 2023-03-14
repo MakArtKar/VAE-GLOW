@@ -1,0 +1,21 @@
+_target_: src.models.vae_module.VAELitModule
+
+net:
+  _target_: src.models.components.vae.VAE
+  nc: 3
+  ndf: 32
+  nef: 32
+  nz: 100
+  isize: ${...image_size}
+
+evaluator:
+  _target_: src.evaluator.evaluator.Evaluator
+  evaluators:
+    - ${....FIDEvaluator}
+
+optimizer:
+  _target_: torch.optim.AdamW
+  _partial_: True
+  lr: 1e-3
+
+scheduler: null
