@@ -13,17 +13,17 @@ class AffineCoupling(BaseFlowModel):
         super().__init__()
         self.model = nn.Sequential(
             nn.Conv2d(in_channels // 2, hid_channels, 3, padding_mode='same'),
-            ActNorm(hid_channels),
+            ActNorm(hid_channels, return_log_det=False),
             nn.ReLU(),
             nn.Conv2d(hid_channels, hid_channels, 1),
-            ActNorm(hid_channels),
+            ActNorm(hid_channels, return_log_det=False),
             nn.ReLU(),
             nn.Conv2d(hid_channels, in_channels, kernel_size=3, padding_mode='same')
         )
         self.model[-1].weight.data.zero_()
         self.model[-1].bias.data.zero_()
 
-    def forward(self, x, reverse=False, return_log_det=False) -> Union[Tensor, Tuple[Tensor, Tensor]]:
+    def forward(self, x, reverse=False) -> Tuple[Tensor, Tensor]:
         xa, xb = torch.chunk(x, 2, 1)
         log_sigma, mu = torch.chunk(self.model(xb), 2, 1)
         sigma = torch.exp(log_sigma)
