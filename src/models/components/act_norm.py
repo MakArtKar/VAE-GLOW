@@ -17,7 +17,7 @@ class ActNorm(BaseFlowModel):
         self.is_initialized = False
         self.return_log_det = return_log_det
 
-    def forward(self, x, reverse=False) -> Tuple[Tensor, Tensor]:
+    def forward(self, x, reverse=False, **kwargs) -> Tuple[Tensor, Tensor]:
         if not self.is_initialized:
             self.mu.data = x.transpose(0, 1).view(x.size(1), -1).mean(1).view_as(self.mu)
             self.sigma.data = (x.transpose(0, 1).view(x.size(1), -1).std(1) + self.EPSILON).view_as(self.sigma)

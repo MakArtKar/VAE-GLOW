@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from typing import Tuple, Sequence
 
+import torch
 import torch.nn as nn
 from torch import Tensor
 
@@ -10,7 +11,7 @@ class BaseFlowModel(nn.Module):
         super().__init__()
 
     @abstractmethod
-    def forward(self, x, reverse=False) -> Tuple[Tensor, Tensor]:
+    def forward(self, x, reverse=False, **kwargs) -> Tuple[Tensor, ...]:
         raise NotImplementedError()
 
 
@@ -19,8 +20,8 @@ class FlowSequential(BaseFlowModel):
         super().__init__()
         self.flow_models = flow_models
 
-    def forward(self, x, reverse=False) -> Tuple[Tensor, Tensor]:
-        log_det: Tensor = 0
+    def forward(self, x, reverse=False, **kwargs) -> Tuple[Tensor, Tensor]:
+        log_det: Tensor = torch.tensor([0]).to(x.device)
         blocks = self.flow_models if not reverse else self.flow_models[::-1]
         for model in blocks:
             x, model_log_det = model(x, log_det, reverse=reverse)

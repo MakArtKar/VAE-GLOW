@@ -23,7 +23,7 @@ class AffineCoupling(BaseFlowModel):
         self.model[-1].weight.data.zero_()
         self.model[-1].bias.data.zero_()
 
-    def forward(self, x, reverse=False) -> Tuple[Tensor, Tensor]:
+    def forward(self, x, reverse=False, **kwargs) -> Tuple[Tensor, Tensor]:
         xa, xb = torch.chunk(x, 2, 1)
         log_sigma, mu = torch.chunk(self.model(xb), 2, 1)
         sigma = torch.exp(log_sigma)

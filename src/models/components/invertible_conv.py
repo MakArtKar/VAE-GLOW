@@ -12,7 +12,7 @@ class InvertibleConv(BaseFlowModel):
         w = torch.qr(torch.randn(in_channels, in_channels))
         self.w = nn.Parameter(w)
 
-    def forward(self, x, reverse=False) -> Tuple[Tensor, Tensor]:
+    def forward(self, x, reverse=False, **kwargs) -> Tuple[Tensor, Tensor]:
         w = self.w if not reverse else self.w.inverse()
         out = nn.functional.conv2d(x, w.unsqueeze(2).unsqueeze(2))
         log_det = torch.slogdet(self.w)[-1] * x.size(2) * x.size(3)
