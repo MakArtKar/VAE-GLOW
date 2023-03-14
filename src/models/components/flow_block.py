@@ -7,6 +7,6 @@ class FlowBlock(FlowSequential):
     def __init__(self, depth: int, in_channels: int, hid_channels: int):
         super().__init__(
             Squeeze(),
-            *[FlowStep(in_channels, hid_channels) for _ in range(depth)],
+            *[FlowStep(4 * in_channels, hid_channels) for _ in range(depth)],
             Split(),
         )

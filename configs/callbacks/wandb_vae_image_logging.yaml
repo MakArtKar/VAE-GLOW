@@ -1,2 +1,0 @@
-wandb_vae_image_logging:
-  _target_: src.callbacks.wandb_vae_image_logging.WandbVAEImageLogging

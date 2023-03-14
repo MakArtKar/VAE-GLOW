@@ -17,10 +17,12 @@ class ActNorm(BaseFlowModel):
         self.is_initialized = False
         self.return_log_det = return_log_det
 
+        self.channels = channels
+
     def forward(self, x, reverse=False, **kwargs) -> Tuple[Tensor, Tensor]:
         if not self.is_initialized:
-            self.mu.data = x.transpose(0, 1).view(x.size(1), -1).mean(1).view_as(self.mu)
-            self.sigma.data = (x.transpose(0, 1).view(x.size(1), -1).std(1) + self.EPSILON).view_as(self.sigma)
+            self.mu.data = x.transpose(0, 1).reshape(x.size(1), -1).mean(1).view_as(self.mu)
+            self.sigma.data = (x.transpose(0, 1).reshape(x.size(1), -1).std(1) + self.EPSILON).view_as(self.sigma)
             self.is_initialized = True
 
         if not reverse:

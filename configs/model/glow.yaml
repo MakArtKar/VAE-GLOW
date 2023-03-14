@@ -5,8 +5,8 @@ net:
   n_flows: 3
   depth: 32
   in_channels: 3
-  hid_channels: 512
-#  isize: ${...image_size}
+  hid_channels: 1
+  image_size: ${...image_size}
 
 evaluator:
   _target_: src.evaluator.evaluator.Evaluator

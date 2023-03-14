@@ -9,7 +9,7 @@ from src.models.components.base_flow_model import BaseFlowModel
 class InvertibleConv(BaseFlowModel):
     def __init__(self, in_channels: int):
         super().__init__()
-        w = torch.qr(torch.randn(in_channels, in_channels))
+        w = torch.qr(torch.randn(in_channels, in_channels))[0]
         self.w = nn.Parameter(w)
 
     def forward(self, x, reverse=False, **kwargs) -> Tuple[Tensor, Tensor]:

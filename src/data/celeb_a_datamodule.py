@@ -50,7 +50,6 @@ class CelebADataModule(pl.LightningDataModule):
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=True,
-            persistent_workers=True
         )
 
     def val_dataloader(self):
@@ -60,7 +59,6 @@ class CelebADataModule(pl.LightningDataModule):
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=False,
-            persistent_workers=True
         )
 
     def test_dataloader(self):
@@ -70,5 +68,4 @@ class CelebADataModule(pl.LightningDataModule):
             num_workers=self.hparams.num_workers,
             pin_memory=self.hparams.pin_memory,
             shuffle=False,
-            persistent_workers=True,
         )

@@ -5,7 +5,7 @@ from torchvision.utils import make_grid
 from src.models.vae_module import VAELitModule
 
 
-class WandbVAEImageLogging(pl.Callback):
+class WandbImageLogging(pl.Callback):
     def on_validation_epoch_start(self, trainer: pl.Trainer, pl_module: VAELitModule) -> None:
         samples = pl_module.net.sample(16, pl_module.device)
         images = make_grid(samples, nrow=4)
