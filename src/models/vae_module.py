@@ -56,7 +56,8 @@ class VAELitModule(pl.LightningModule):
         kld_loss = self.kld_loss(mu, logvar)
         loss = mse_loss + kld_loss
         if batch_idx % self.hparams.fid_frequency == 0:
-            self.evaluator.add_images(real_images=x, fake_images=recon_x)
+            fake_images = self.net.sample(x.size(0), self.device)
+            self.evaluator.add_images(real_images=x, fake_images=fake_images)
 
         self.log(f'{mode}/mse_loss', mse_loss, prog_bar=True, sync_dist=True, batch_size=x.size(0))
         self.log(f'{mode}/kld_loss', kld_loss, prog_bar=True, sync_dist=True, batch_size=x.size(0))

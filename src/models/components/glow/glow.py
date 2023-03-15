@@ -46,4 +46,6 @@ class Glow(BaseFlowModel):
 
     def sample(self, batch_size: int, device):
         z = self.sample_z((batch_size, *self.out_shape), device)
-        return self.forward(z, reverse=True)[0]
+        sample = self.forward(z, reverse=True)[0]
+        sample = torch.clip(sample, -1, 1)
+        return sample

@@ -37,4 +37,5 @@ class VAE(nn.Module):
 
     def sample(self, size, device):
         sample = torch.randn(size, self.nz).to(device)
+        sample = torch.clip(sample, -1, 1)
         return self.decode(sample)

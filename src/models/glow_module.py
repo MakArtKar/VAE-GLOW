@@ -53,9 +53,12 @@ class GlowLitModule(pl.LightningModule):
         x = batch['image']
         z_out, z_list, log_det = self(x)
         loss = -self.get_log_likelyhood(z_list, log_det)
-        recon_x, _, _ = self.net(z_out, reverse=True, z_list=z_list)
+        recon_x = None
+        if batch_idx == 0:
+            recon_x, _, _ = self.net(z_out, reverse=True, z_list=z_list)
         if batch_idx % self.hparams.fid_frequency == 0:
-            self.evaluator.add_images(real_images=x, fake_images=recon_x)
+            fake_images = self.net.sample(x.size(0), self.device)
+            self.evaluator.add_images(real_images=x, fake_images=fake_images)
         self.log(f'{mode}/loss', loss, on_step=True, prog_bar=True, sync_dist=True, batch_size=x.size(0))
         result = {'loss': loss}
         if batch_idx == 0:
