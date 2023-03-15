@@ -18,6 +18,7 @@ class GlowLitModule(pl.LightningModule):
             optimizer: torch.optim.Optimizer,
             scheduler=None,
             fid_frequency: int = 5,
+            grad_norm_clip: float = 50,
     ):
         super().__init__()
         self.save_hyperparameters(logger=False, ignore=['net', 'evaluator'])
