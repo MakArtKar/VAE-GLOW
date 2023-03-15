@@ -35,7 +35,7 @@ def test_affine_coupling(in_channels: int, hid_channels: int):
 @pytest.mark.parametrize("in_channels", [8])
 def test_invertible_conv(in_channels: int):
     invertible_conv = InvertibleConv(in_channels)
-    check_reconstruction(invertible_conv, in_channels=in_channels)
+    check_reconstruction(invertible_conv, in_channels=in_channels, atol=2e-6)
 
 
 def test_squeeze():

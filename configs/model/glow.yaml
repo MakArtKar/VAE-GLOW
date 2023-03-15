@@ -5,7 +5,7 @@ net:
   n_flows: 3
   depth: 32
   in_channels: 3
-  hid_channels: 1
+  hid_channels: 512
   image_size: ${...image_size}
 
 evaluator:

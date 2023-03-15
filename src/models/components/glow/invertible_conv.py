@@ -14,14 +14,14 @@ class InvertibleConv(BaseFlowModel):
         # if torch.linalg.det(w) < 0:
         #     w = -w
 
-        # w = torch.qr(torch.randn(in_channels, in_channels))[0]
+        # w = torch.linalg.qr(torch.randn(in_channels, in_channels))[0]
         # self.w = nn.Parameter(w)
 
         weight = torch.linalg.qr(torch.randn(in_channels, in_channels))[0]
         permutation, lower, upper = torch.lu_unpack(*torch.linalg.lu_factor(weight))
         self.permutation, self.lower, self.upper = nn.Parameter(permutation), nn.Parameter(lower), nn.Parameter(upper)
         s = self.upper.diag()
-        self.register_buffer('det_sign', s.sign())
+        self.register_buffer('s_sign', s.sign().detach())
         self.register_buffer('lower_mask', torch.tril(torch.ones_like(self.lower), -1))
         self.log_s = nn.Parameter(s.abs().log())
 
@@ -36,7 +36,7 @@ class InvertibleConv(BaseFlowModel):
     def forward(self, x, reverse=False, **kwargs) -> Tuple[Tensor, Tensor]:
         log_det = self.log_s.sum() * x.size(2) * x.size(3)
         lower = self.lower * self.lower_mask + torch.eye(x.size(1), device=x.device)
-        upper = self.upper * self.lower_mask.T + (self.det_sign * self.log_s.exp()).diag()
+        upper = self.upper * self.lower_mask.T + (self.s_sign * self.log_s.exp()).diag()
         if reverse:
             log_det = -log_det
             lower = lower.inverse()
