@@ -6,7 +6,7 @@ defaults:
   - _self_
   - data: celeba.yaml
   - model: vae.yaml
-  - callbacks: generative.yaml
+  - callbacks: vae.yaml
   - logger: wandb # set logger here or use command line (e.g. `python train.py logger=tensorboard`)
   - trainer: default.yaml
   - paths: default.yaml

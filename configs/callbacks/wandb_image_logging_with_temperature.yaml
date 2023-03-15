@@ -1,0 +1,6 @@
+wandb_vae_image_logging:
+  _target_: src.callbacks.wandb_image_logging_with_temperature.WandbImageLoggingWithTemperature
+  temperatures:
+    - 0.5
+    - 0.7
+    - 1.

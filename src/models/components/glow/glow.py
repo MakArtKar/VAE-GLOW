@@ -18,7 +18,7 @@ class Glow(BaseFlowModel):
         self.image_size = image_size
         self.out_shape = (in_channels * 2 ** (n_flows + 2), image_size // 2 ** n_flows, image_size // 2 ** n_flows)
 
-    def forward(self, x, reverse=False, z_list=None, **kwargs) -> Tuple[Tensor, List[Tensor], Tensor]:
+    def forward(self, x, reverse=False, z_list=None, temperature=1., **kwargs) -> Tuple[Tensor, List[Tensor], Tensor]:
         if not reverse:
             z_list = []
         glow_blocks = self.glow_blocks if not reverse else self.glow_blocks[::-1]
@@ -33,7 +33,7 @@ class Glow(BaseFlowModel):
                 z_list.append(z)
             else:
                 if z_list is None:
-                    z = self.sample_z(x.shape, x.device)
+                    z = temperature * self.sample_z(x.shape, x.device)
                 else:
                     z = z_list[-i - 1]
                 x, model_log_det = m(x, reverse=reverse, z=z)
@@ -44,8 +44,8 @@ class Glow(BaseFlowModel):
     def sample_z(shape, device):
         return torch.randn(shape).to(device)
 
-    def sample(self, batch_size: int, device):
-        z = self.sample_z((batch_size, *self.out_shape), device)
-        sample = self.forward(z, reverse=True)[0]
+    def sample(self, batch_size: int, device, temperature: float = 1.):
+        z = temperature * self.sample_z((batch_size, *self.out_shape), device)
+        sample = self.forward(z, reverse=True, temperature=temperature)[0]
         sample = torch.clip(sample, -1, 1)
         return sample

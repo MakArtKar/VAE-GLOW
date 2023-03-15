@@ -57,7 +57,7 @@ class GlowLitModule(pl.LightningModule):
         if batch_idx == 0:
             recon_x, _, _ = self.net(z_out, reverse=True, z_list=z_list)
         if batch_idx % self.hparams.fid_frequency == 0:
-            fake_images = self.net.sample(x.size(0), self.device)
+            fake_images = self.net.sample(x.size(0), self.device, temperature=0.7)
             self.evaluator.add_images(real_images=x, fake_images=fake_images)
         self.log(f'{mode}/loss', loss, on_step=True, prog_bar=True, sync_dist=True, batch_size=x.size(0))
         result = {'loss': loss}
@@ -77,7 +77,7 @@ class GlowLitModule(pl.LightningModule):
         self.on_validation_epoch_start()
 
     def test_step(self, batch, batch_idx: int):
-        self.validation_step(batch, batch_idx, mode='test')
+        return self.validation_step(batch, batch_idx, mode='test')
 
     def test_epoch_end(self, outputs):
         self.validation_epoch_end(outputs, mode='test')
