@@ -3,7 +3,7 @@ from typing import Tuple, Union
 import torch
 from torch import Tensor
 
-from src.models.components.base_flow_model import BaseFlowModel
+from src.models.components.glow.base_flow_model import BaseFlowModel
 
 
 class Split(BaseFlowModel):
@@ -13,4 +13,4 @@ class Split(BaseFlowModel):
         if not reverse:
             return *torch.chunk(x, 2, 1), log_det
         else:
-            return torch.cat([z, x], 1), log_det
+            return torch.cat([x, z], 1), log_det

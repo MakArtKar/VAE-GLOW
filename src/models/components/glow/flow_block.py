@@ -1,6 +1,6 @@
-from src.models.components.flow_step import FlowSequential, FlowStep
-from src.models.components.split import Split
-from src.models.components.squeeze import Squeeze
+from src.models.components.glow.flow_step import FlowSequential, FlowStep
+from src.models.components.glow.split import Split
+from src.models.components.glow.squeeze import Squeeze
 
 
 class FlowBlock(FlowSequential):

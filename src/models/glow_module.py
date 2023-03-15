@@ -1,12 +1,12 @@
+import math
 from typing import List
 
 import pytorch_lightning as pl
 import torch
-import torch.nn as nn
 from torch import Tensor
 
 from src.evaluator.evaluator import Evaluator
-from src.models.components.glow import Glow
+from src.models.components.glow.glow import Glow
 
 
 # Seminar 6
@@ -20,7 +20,7 @@ class GlowLitModule(pl.LightningModule):
             fid_frequency: int = 5,
     ):
         super().__init__()
-        self.save_hyperparameters(logger=False)
+        self.save_hyperparameters(logger=False, ignore=['net', 'evaluator'])
         self.net = net
         self.evaluator = evaluator
 
@@ -30,7 +30,9 @@ class GlowLitModule(pl.LightningModule):
         return self.net(x)
 
     def get_log_likelyhood(self, z_list: List[Tensor], log_det: Tensor) -> Tensor:
-        return sum(self.normal.log_prob(z).mean() for z in z_list) + log_det.mean()
+        return (
+            sum(self.normal.log_prob(z).mean((1, 2, 3)) / math.log(2) for z in z_list) + log_det
+        ).mean()
 
     def training_step(self, batch, batch_idx: int):
         x = batch['image']

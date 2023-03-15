@@ -2,7 +2,7 @@ from typing import Tuple
 
 from torch import Tensor
 
-from src.models.components.base_flow_model import BaseFlowModel
+from src.models.components.glow.base_flow_model import BaseFlowModel
 
 
 class Squeeze(BaseFlowModel):

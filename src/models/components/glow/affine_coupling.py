@@ -1,11 +1,11 @@
-from typing import Union, Tuple
+from typing import Tuple
 
 import torch
 import torch.nn as nn
 from torch import Tensor
 
-from src.models.components.act_norm import ActNorm
-from src.models.components.base_flow_model import BaseFlowModel
+from src.models.components.glow.act_norm import ActNorm
+from src.models.components.glow.base_flow_model import BaseFlowModel
 
 
 class AffineCoupling(BaseFlowModel):

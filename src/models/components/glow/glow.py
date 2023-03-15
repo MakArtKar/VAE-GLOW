@@ -3,9 +3,8 @@ from typing import Tuple, List
 import torch
 from torch import nn, Tensor
 
-from src.models.components.base_flow_model import FlowSequential, BaseFlowModel
-from src.models.components.flow_block import FlowBlock
-from src.models.components.squeeze import Squeeze
+from src.models.components.glow.base_flow_model import BaseFlowModel
+from src.models.components.glow.flow_block import FlowBlock
 
 
 class Glow(BaseFlowModel):
