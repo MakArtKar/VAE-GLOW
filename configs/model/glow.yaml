@@ -3,9 +3,9 @@ _target_: src.models.glow_module.GlowLitModule
 net:
   _target_: src.models.components.glow.Glow
   n_flows: 3
-  depth: 16
+  depth: 8
   in_channels: 3
-  hid_channels: 128
+  hid_channels: 64
   image_size: ${...image_size}
 
 evaluator:
