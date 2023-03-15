@@ -3,7 +3,7 @@ _target_: src.models.glow_module.GlowLitModule
 net:
   _target_: src.models.components.glow.Glow
   n_flows: 3
-  depth: 32
+  depth: 16
   in_channels: 3
   hid_channels: 128
   image_size: ${...image_size}
@@ -24,5 +24,5 @@ scheduler:
   _partial_: True
   max_lr: 1e-2
   epochs: ${trainer.max_epochs}
-  steps_per_epoch: 25000
+  steps_per_epoch: ${trainer.limit_train_batches}
 

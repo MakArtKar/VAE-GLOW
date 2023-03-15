@@ -3,6 +3,7 @@ from typing import List
 
 import pytorch_lightning as pl
 import torch
+import wandb
 from torch import Tensor
 
 from src.evaluator.evaluator import Evaluator
@@ -27,17 +28,24 @@ class GlowLitModule(pl.LightningModule):
 
         self.normal = torch.distributions.Normal(0, 1)
 
+        self.initialize_watching = False
+
     def forward(self, x: torch.Tensor):
         z, z_list, log_det = self.net(x)
-        z = torch.nan_to_num(z)
-        z_list = [torch.nan_to_num(_z) for _z in z_list]
-        log_det = torch.nan_to_num(log_det)
+        # z = torch.nan_to_num(z)
+        # z_list = [torch.nan_to_num(_z) for _z in z_list]
+        # log_det = torch.nan_to_num(log_det)
         return z, z_list, log_det
 
     def get_log_likelyhood(self, z_list: List[Tensor], log_det: Tensor) -> Tensor:
         return (
             sum(self.normal.log_prob(z).mean((1, 2, 3)) / math.log(2) for z in z_list) + log_det
         ).mean()
+
+    def on_train_epoch_start(self) -> None:
+        if not self.initialize_watching:
+            wandb.watch(self.net, log='all', log_freq=100)
+            self.initialize_watching = True
 
     def training_step(self, batch, batch_idx: int):
         x = batch['image']
@@ -91,8 +99,7 @@ class GlowLitModule(pl.LightningModule):
                 'lr_scheduler': {
                     'scheduler': scheduler,
                     'monitor': 'val/fid',
-                    'mode': 'min',
-                    'interval': 'epoch',
+                    'interval': 'step',
                     'frequency': 1,
                 },
             }

@@ -20,13 +20,15 @@ class AffineCoupling(BaseFlowModel):
             nn.ReLU(),
             nn.Conv2d(hid_channels, in_channels, kernel_size=3, padding='same')
         )
+        self.log_scale = nn.Parameter(torch.zeros(in_channels, 1, 1))
         self.model[-1].weight.data.zero_()
         self.model[-1].bias.data.zero_()
 
     def forward(self, x, reverse=False, **kwargs) -> Tuple[Tensor, Tensor]:
         xa, xb = torch.chunk(x, 2, 1)
-        log_sigma, mu = torch.chunk(self.model(xb), 2, 1)
-        sigma = torch.sigmoid(log_sigma + 2) # for preventing gradient explode; sigmoid(2) ~ identity
+        out = self.model(xb) * self.log_scale.exp()
+        log_sigma, mu = torch.chunk(out, 2, 1)
+        sigma = torch.sigmoid(log_sigma + 2)  # for preventing gradient explode; sigmoid(2) ~ identity
 
         log_det = sigma.log().view(x.size(0), -1).sum(1)
 
