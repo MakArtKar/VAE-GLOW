@@ -40,8 +40,8 @@ class CelebADataModule(pl.LightningDataModule):
 
     def setup(self, stage: Optional[str] = None):
         if not self.data_train and not self.data_val and not self.data_test:
-            self.data_train = WrappedCelebADataset(self.hparams.data_dir, transform=self.hparams.train_transform)
-            self.data_val = self.data_test = WrappedCelebADataset(self.hparams.data_dir, transform=self.hparams.val_transform)
+            self.data_train = Subset(WrappedCelebADataset(self.hparams.data_dir, transform=self.hparams.train_transform), range(2048))
+            self.data_val = self.data_test = Subset(WrappedCelebADataset(self.hparams.data_dir, transform=self.hparams.val_transform), range(2048))
 
     def train_dataloader(self):
         return DataLoader(

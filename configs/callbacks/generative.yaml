@@ -1,0 +1,3 @@
+defaults:
+  - default
+  - wandb_image_logging

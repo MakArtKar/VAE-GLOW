@@ -20,7 +20,7 @@ class ActNorm(BaseFlowModel):
         self.channels = channels
 
     def forward(self, x, reverse=False, **kwargs) -> Tuple[Tensor, Tensor]:
-        if not self.is_initialized:
+        if not self.is_initialized and self.training:
             self.mu.data = x.transpose(0, 1).reshape(x.size(1), -1).mean(1).view_as(self.mu)
             self.sigma.data = (x.transpose(0, 1).reshape(x.size(1), -1).std(1) + self.EPSILON).view_as(self.sigma)
             self.is_initialized = True

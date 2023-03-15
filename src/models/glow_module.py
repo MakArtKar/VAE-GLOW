@@ -27,7 +27,11 @@ class GlowLitModule(pl.LightningModule):
         self.normal = torch.distributions.Normal(0, 1)
 
     def forward(self, x: torch.Tensor):
-        return self.net(x)
+        z, z_list, log_det = self.net(x)
+        z = torch.nan_to_num(z)
+        z_list = [torch.nan_to_num(_z) for _z in z_list]
+        log_det = torch.nan_to_num(log_det)
+        return z, z_list, log_det
 
     def get_log_likelyhood(self, z_list: List[Tensor], log_det: Tensor) -> Tensor:
         return (
@@ -51,7 +55,7 @@ class GlowLitModule(pl.LightningModule):
         recon_x, _, _ = self.net(z_out, reverse=True, z_list=z_list)
         if batch_idx % self.hparams.fid_frequency == 0:
             self.evaluator.add_images(real_images=x, fake_images=recon_x)
-        self.log('train/loss', loss, on_step=True, prog_bar=True, sync_dist=True, batch_size=x.size(0))
+        self.log(f'{mode}/loss', loss, on_step=True, prog_bar=True, sync_dist=True, batch_size=x.size(0))
         result = {'loss': loss}
         if batch_idx == 0:
             result.update({
